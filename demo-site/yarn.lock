@@ -4250,9 +4250,9 @@ react-dom@^16.3.2:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react-nested-validation@latest:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/react-nested-validation/-/react-nested-validation-0.0.1.tgz#d96b11c5e936072479e6cab731394f6d46419051"
+react-nested-validation@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/react-nested-validation/-/react-nested-validation-0.0.3.tgz#2e994567a254662f053f56aea110605915ddfde5"
 
 react@^16.3.2:
   version "16.3.2"
