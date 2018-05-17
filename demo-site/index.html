@@ -15,16 +15,27 @@ layout: base
   <p>All examples given are written with babel loaders to support es6 (stage-0) and JSX syntax.</p>
 
   <h2>Basic Example</h2>
+  <p>In the basic example we are interested in populating data about a movie; the title
+    and the year. In this case we need a single form, and a presentational component. We'll validate
+    that the data has a name.</p>
+  <p>Below the form inputs you'll see the current value of the `form` prop passed to the
+    form's `onChange` handler.</p>
   <div class="demo-basic"></div>
   <code class="script" data-source="{{ site.baseurl }}/basic/forms.js">Loading...</code>
   <code class="script" data-source="{{ site.baseurl }}/basic/components.js">Loading...</code>
 
   <h2>Nested Example</h2>
+  <p>In this example we show how two different forms can be combined into one. This helps
+    with resusability of form validations. We have a form designed to validate a person, and
+    our previous movie form. By combining them we can capitalise on them in many locations. In
+    this instance we'll add a director to the movie.</p>
   <div class="demo-nested"></div>
   <code class="script" data-source="{{ site.baseurl }}/nested/forms.js">Loading...</code>
   <code class="script" data-source="{{ site.baseurl }}/nested/components.js">Loading...</code>
 
   <h2>Array Example</h2>
+  <p>In a more complicated example, we'll take the same setup as for the nested example, but
+    add a list of actors, also using the `PersonForm`.</p>
   <div class="demo-array"></div>
   <code class="script" data-source="{{ site.baseurl }}/array/forms.js">Loading...</code>
   <code class="script" data-source="{{ site.baseurl }}/array/components.js">Loading...</code>
