@@ -32,8 +32,6 @@ class MovieAndActorsForm extends Form {
   }
 
   validateForm(errorSet) {
-    console.log(this.isTouched('movie.title'))
-    console.log(this.getValue('movie.title'))
     if (this.isTouched('movie.title') && this.getValue('movie.title') == 'Jaws') {
       errorSet.addFormError({
         type: Form.WARNING,
