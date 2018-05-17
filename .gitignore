@@ -1,0 +1,24 @@
+# Distribution / packaging
+var
+lib
+**dist
+**_site
+
+# General
+**~
+*.log
+*.DS_Store
+
+# Node
+node_modules
+
+# Keys
+**.cert
+**.key
+**.pem
+
+# Secret environment.
+.envrc
+
+# VisualCode
+.vscode/

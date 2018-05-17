@@ -1,0 +1,7 @@
+exclude: []
+
+layouts_dir: '_layouts'
+
+package_name: React Nested Validation
+package_github_url: https://github.com/uptick/react-nested-validation
+package_npm_url: https://www.npmjs.com/package/react-nested-validation
