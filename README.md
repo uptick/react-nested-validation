@@ -1,6 +1,6 @@
 # react-nested-validation
 
-A toolkit for performing nested validation of React forms. Please find
+A toolkit for performing nested validation of forms in React. Please find
 a [live demo here](https://uptick.github.io/react-nested-validation/).
 
 ## Rationale
@@ -21,7 +21,9 @@ used with a variety of presentational frameworks, and so we made
 
 ## Design
 
-There are three main components:
+No components are offered to help render your presentational components.
+You are able to render them any way you choose, using any framework.
+Three main categories of components are provided:
 
  * Forms.
  
@@ -31,151 +33,21 @@ There are three main components:
  
 Forms are the main interface for designing both the validation, and
 the nested structure of your validation. Forms are ES6 classes that
-contain links to subforms, and allow for methods to be overidden in
+contain links to nested forms, and allow for methods to be overidden in
 order to validate both fields and general form errors.
 
 Validator functions are conveniences for performing common validation
-operations, e.g. required fields.
+operations, e.g. required fields. Presently there are only two prepackaged
+validators: `required` and `emptyWarning`.
 
 The React component wrappers are two higher-order components to help
-apply `Form`s to your presentational React comonents.
+apply `Form`s to your presentational React comonents. They wrap any
+other React component, transforming it into a managed form. A single
+prop, `form`, is given to the inner component which contains all the
+information not just for the current form, but all nested forms too.
 
-## Basic example
+## More to come
 
-```javascript
-import Form, {required} from 'react-nested-validation'
-
-class MovieForm extends Form {
-  fieldValidators = {
-    title: required()
-  }
-}
-```
-
-```javascript
-import React from 'react'
-import {asForm} from 'react-nested-validation'
-
-@asForm({form: BasicForm})
-class Movie extends React.Component {
-  render() {
-    const {form} = this.props
-    const {values, errors, touched} = form
-    return (
-      <div>
-        <input
-          name="title"
-          value={values.title}
-        />
-        <input
-          name="year"
-          value={values.year}
-        />
-      </div>
-    )
-  }
-}
-```
-
-## Nested example
-
-```javascript
-import Form, {required} from 'react-nested-validation'
-
-class DirectorForm extends Form {
-  fieldValidators = {
-    name: required()
-  }
-}
-
-class MovieForm extends Form {
-  fieldValidators = {
-    title: required()
-  }
-  nested = {
-    director: DirectorForm
-  }
-}
-```
-
-```javascript
-import React from 'react'
-import {asForm} from 'react-nested-validation'
-
-@asForm({form: SubForm})
-class Sub extends React.Component {
-  render() {
-    const {form} = this.props
-    const {values, errors, touched} = form
-    // Render your form here.
-  }
-}
-
-@asForm({form: SuperForm})
-class Super extends React.Component {
-  render() {
-    const {form} = this.props
-    const {values, errors, touched} = form
-    return (
-      <div>
-        <Sub
-          form={values.sub}
-          prefix="sub"
-        />
-      </div>
-    )
-  }
-}
-```
-
-## Array example
-
-```javascript
-import Form, {required} from 'react-nested-validation'
-
-class MovieForm extends Form {
-  fieldValidators = {
-    title: required()
-  }
-}
-
-class MovieListForm extends Form {
-  nested = [
-    MovieForm
-  ]
-}
-```
-
-```javascript
-import React from 'react'
-import {asForm} from 'react-nested-validation'
-
-@asForm({form: SubForm})
-class Sub extends React.Component {
-  render() {
-    const {form} = this.props
-    const {values, errors, touched} = form
-    // Render your form here.
-  }
-}
-
-@asForm({form: SuperForm})
-class Super extends React.Component {
-  render() {
-    const {form} = this.props
-    const {values, errors, touched} = form
-    return (
-      <div>
-        {
-          values.map((sub, ii) => (
-            <Sub
-              form={sub}
-              prefix={ii}
-            />
-          ))
-        }
-      </div>
-    )
-  }
-}
-```
+While we're working on improving the design documentation, please
+take a look at the [live examples](https://uptick.github.io/react-nested-validation/)
+for more of an idea how to get started.
