@@ -231,15 +231,14 @@ export default class Form {
   }
 
   isTouched(name, touched) {
+    const [state, last] = this.lookupForm(name)
     if (this.forceValidation) {
       // One is added to the touched value so that after a forced
       // validation the form doesn't forget about showing the error
       // after future changes.
-      this.state.touched[name] = (this.state.touched[name] || 0) + 1
-      return true
+      state.touched[last] = true
     }
-    touched = this.getTouched(touched)
-    return (touched[name] || 0) > 0
+    return (state.touched[last] || false)
   }
 
   getTouched(touched) {
@@ -255,8 +254,20 @@ export default class Form {
   }
 
   getValue(name) {
-    const values = this.getValues()
-    return name ? values[name] : values
+    const [state, last] = this.lookupForm(name)
+    return name ? state.values[last] : state.values
+  }
+
+  lookupForm(name) {
+    let state = this.state
+    if (name) {
+      const parts = name.split('.')
+      for (const part of parts.slice(0, parts.length - 1)) {
+        state = state.values[part]
+      }
+      name = parts[parts.length - 1]
+    }
+    return [state, name]
   }
 
   _getState(value, name, fallback) {

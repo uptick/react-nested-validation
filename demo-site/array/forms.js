@@ -30,6 +30,17 @@ class MovieAndActorsForm extends Form {
     director: PersonForm,
     actors: PersonListForm
   }
+
+  validateForm(errorSet) {
+    console.log(this.isTouched('movie.title'))
+    console.log(this.getValue('movie.title'))
+    if (this.isTouched('movie.title') && this.getValue('movie.title') == 'Jaws') {
+      errorSet.addFormError({
+        type: Form.WARNING,
+        message: 'Good choice!'
+      })
+    }
+  }
 }
 
 export {
