@@ -1,0 +1,44 @@
+{
+  "name": "react-nested-validation-demo-site",
+  "version": "0.0.1",
+  "description": "Demo site for react-nested-validation package",
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/webpack",
+    "watch": "./node_modules/.bin/webpack --watch",
+    "serve": "jekyll serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uptick/react-nested-validation.git"
+  },
+  "keywords": [
+    "react",
+    "validation",
+    "form"
+  ],
+  "author": "Uptick Pty Ltd",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/uptick/react-nested-validation/issues"
+  },
+  "homepage": "https://github.com/uptick/react-nested-validation#readme",
+  "dependencies": {
+    "react-nested-validation": "latest",
+    "uptick-demo-site": "latest"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "css-loader": "^0.28.11",
+    "style-loader": "^0.20.3",
+    "webpack": "^4.8.3",
+    "webpack-cli": "^2.1.3"
+  }
+}
