@@ -1,6 +1,6 @@
 {
   "name": "react-nested-validation",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A toolkit for performing nested validation of React forms.",
   "esnext": "src/index.js",
   "main": "dist/index.js",
