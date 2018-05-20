@@ -92,6 +92,29 @@ export default class Form {
     return this.state
   }
 
+  renderValues() {
+    let {values} = this.state
+    if (Array.isArray(this.nested)) {
+      const Sub = this.nested[0]
+      values = (values || []).map(x => new Sub(x).renderValues())
+    }
+    else if (this.nested) {
+      values = values || {}
+      let newValues = {
+        ...values
+      }
+      for (const [fldName, Sub] of Object.entries(this.nested)) {
+        const sub = new Sub(values[fldName])
+        newValues[fldName] = sub.renderValues()
+      }
+      values = newValues
+    }
+    else {
+      values = values || {}
+    }
+    return values
+  }
+
   validate(force) {
     this.forceValidation = force // isTouched always returns true
     const errorSet = new ErrorSet()

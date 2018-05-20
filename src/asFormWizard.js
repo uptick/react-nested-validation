@@ -12,6 +12,7 @@ export default options => Inner => {
 
   @asForm(otherOpts)
   class Outer extends React.Component {
+    static Form = options.form
 
     state = {
       page: isFunc(initialPage) ? initialPage(this.props) : initialPage,

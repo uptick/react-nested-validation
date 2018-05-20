@@ -8,6 +8,7 @@ import {isNil} from './utils'
  */
 export default options => Inner =>
   class extends React.Component {
+    static Form = options.form
 
     constructor(props) {
       super(props)

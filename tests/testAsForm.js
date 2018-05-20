@@ -6,6 +6,7 @@ import Adapter from 'enzyme-adapter-react-16'
 import Form from '../src/Form'
 import asForm from '../src/asForm'
 
+import {SubForm, ParentForm} from './forms'
 import {wrapper, setupJSDOM} from './utils'
 
 setupJSDOM()
@@ -36,15 +37,6 @@ describe('Simple form', function() {
 })
 
 describe('Nested form', function() {
-
-  class SubForm extends Form {
-  }
-
-  class ParentForm extends Form {
-    nested = {
-      sub: SubForm
-    }
-  }
 
   @asForm({form: SubForm})
   class Sub extends React.Component {
