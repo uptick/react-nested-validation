@@ -11,6 +11,8 @@ export default class Form {
 
   static WARNING = 'warning'
 
+  static MULTI = ''
+
   /**
    * Ensure an errors object has all standard fields.
    */
@@ -66,28 +68,47 @@ export default class Form {
    */
   parse(values, forceValidation) {
     if (Array.isArray(this.nested)) {
-      const sub = new this.nested[0]()
-      values = (values || []).map(x => sub.parse(x, forceValidation))
-    }
-    else if (this.nested) {
-      values = values || {}
-      let newValues = {
+      values = (values || []).map(x => {
+        const sub = new this.nested[0]()
+        return sub.parse(x, forceValidation)
+      })
+      values = [
+        ...(this.state.values || []),
         ...values
-      }
-      for (const [fldName, Sub] of Object.entries(this.nested)) {
-        const sub = new Sub()
-        newValues[fldName] = sub.parse(values[fldName], forceValidation)
-      }
-      values = newValues
+      ]
     }
     else {
-      values = values || {}
+      if (this.nested) {
+        values = values || {}
+        let newValues = {
+          ...values
+        }
+        for (const [fldName, Sub] of Object.entries(this.nested)) {
+          const sub = new Sub()
+          newValues[fldName] = sub.parse(values[fldName], forceValidation)
+        }
+        values = newValues
+      }
+      else {
+        values = values || {}
+      }
+      values = {
+        ...(this.state.values || {}),
+        ...values
+      }
     }
     this.state = {
       ...this.state,
       values,
       touched: {}
     }
+
+    // Handle multi-forms. Apply each multi-form to the same state we've
+    // just calculated.
+    for (const MultiForm of (this.multi || [])) {
+      this.state = new MultiForm(this.state).parse(values, forceValidation)
+    }
+
     this.validate(forceValidation)
     return this.state
   }
@@ -200,7 +221,8 @@ export default class Form {
 
   updateValue(name, value) {
     let values = this.getValues()
-    let touched
+    let touched = this.state.touched
+    let errors
     if (Array.isArray(values)) {
       // TODO: Manage touched when removing an array item.
       if (name === null) {
@@ -227,14 +249,26 @@ export default class Form {
           }
         }
       }
-      touched = this.state.touched
     }
     else {
-      values = {
-        ...values,
-        [name]: value
+      if (name === Form.MULTI) {
+        values = {
+          ...values,
+          ...value.values
+        }
+        touched = {
+          ...touched,
+          ...(value.touched || {})
+        }
+        errors = value.errors
       }
-      touched = this.updateTouched(name, value, this.state.touched)
+      else {
+        values = {
+          ...values,
+          [name]: value
+        }
+        touched = this.updateTouched(name, value, this.state.touched)
+      }
     }
     this.state = {
       ...this.state,
@@ -242,6 +276,9 @@ export default class Form {
       touched
     }
     this.state.errors = this.validate()
+    if (errors) {
+      this.state.errors = ErrorSet.merge(this.state.errors, errors)
+    }
   }
 
   updateTouched(name, value, touched) {

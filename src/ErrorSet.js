@@ -9,6 +9,20 @@ export default class ErrorSet {
     this.errors = Form.normalizeErrors()
   }
 
+  static merge(a, b) {
+    return {
+      fields: {
+        ...a.fields,
+        ...b.fields
+      },
+      form: [
+        ...a.form,
+        ...b.form
+      ],
+      counts: this._mergeCounts(a.counts, b.counts)
+    }
+  }
+
   /**
    * Add an error to a form field.
    *
@@ -38,6 +52,14 @@ export default class ErrorSet {
 
   updateCounts(type, count = 1) {
     this.errors.counts[type] = (this.errors.counts[type] || 0) + count
+  }
+
+  static _mergeCounts(a, b) {
+    const newCounts = {...a}
+    for (const [type, value] of Object.entries(b)) {
+      newCounts[type] = (newCounts[type] || 0) + value
+    }
+    return newCounts
   }
 
 }

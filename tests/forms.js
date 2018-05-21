@@ -15,8 +15,30 @@ class ArrayForm extends Form {
   ]
 }
 
+class FormA extends Form {
+  nested = {
+    a: ArrayForm
+  }
+}
+
+class FormB extends Form {
+  nested = {
+    b: ArrayForm
+  }
+}
+
+class MultiForm extends Form {
+  multi = [
+    FormA,
+    FormB
+  ]
+}
+
 export {
   SubForm,
   ParentForm,
-  ArrayForm
+  ArrayForm,
+  FormA,
+  FormB,
+  MultiForm
 }

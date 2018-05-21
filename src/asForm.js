@@ -51,11 +51,13 @@ export default options => Inner =>
       const form = this.makeForm()
       form.updateValue(name, value)
       const {onChange, formPrefix} = this.props
-      if (onChange && !isNil(formPrefix)) {
-        onChange(formPrefix, form.state)
-      }
-      else if (onChange) {
-        onChange(form.state, name, value)
+      if (onChange) {
+        if (formPrefix === Form.MULTI || !isNil(formPrefix)) {
+          onChange(formPrefix, form.state)
+        }
+        else {
+          onChange(form.state, name, value)
+        }
       }
     }
 

@@ -20,15 +20,16 @@ export default options => Inner => {
       visited: {}
     }
 
-    nextPage = (form, next) => {
-      const {onChange} = this.props
+    nextPage = (form, next, invalid) => {
       const {page, visited} = this.state
       if (!!form) {
         form.validate(true)
       }
       const firstTime = !visited[page]
       if (!!form && (form.state.errors.counts.error > 0 || (form.state.errors.counts.warning > 0 && firstTime))) {
-        onChange(page, form.state)
+        if (invalid) {
+          invalid(page, form)
+        }
         this.setState({visited: {...visited, [page]: true}})
       }
       else if (isFunc(next)) {
