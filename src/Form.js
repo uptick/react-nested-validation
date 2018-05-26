@@ -67,6 +67,7 @@ export default class Form {
    * @param {bool}           forceValidation Force initial form validation.
    */
   parse(values, forceValidation) {
+    const initial = values
     if (Array.isArray(this.nested)) {
       values = (values || []).map(x => {
         const sub = new this.nested[0]()
@@ -100,7 +101,8 @@ export default class Form {
     this.state = {
       ...this.state,
       values,
-      touched: {}
+      touched: {},
+      initial
     }
 
     // Handle multi-forms. Apply each multi-form to the same state we've
@@ -113,25 +115,42 @@ export default class Form {
     return this.state
   }
 
-  renderValues() {
-    let {values} = this.state
+  renderValues(values) {
+    if (values === undefined) {
+      values = this.state.values
+    }
     if (Array.isArray(this.nested)) {
       const Sub = this.nested[0]
       values = (values || []).map(x => new Sub(x).renderValues())
     }
-    else if (this.nested) {
-      values = values || {}
-      let newValues = {
-        ...values
-      }
-      for (const [fldName, Sub] of Object.entries(this.nested)) {
-        const sub = new Sub(values[fldName])
-        newValues[fldName] = sub.renderValues()
-      }
-      values = newValues
-    }
     else {
       values = values || {}
+      if (this.nested) {
+        let newValues = {
+          ...values
+        }
+        for (const [fldName, Sub] of Object.entries(this.nested)) {
+          const sub = new Sub(values[fldName])
+          newValues[fldName] = sub.renderValues()
+        }
+        values = newValues
+      }
+      if(this.multi) {
+        values = values || {}
+        let newValues = {
+          ...values
+        }
+        for (const Multi of this.multi) {
+          newValues = {
+            ...newValues,
+            ...new Multi().renderValues(newValues)
+          }
+        }
+        values = newValues
+      }
+      else {
+        values = values || {}
+      }
     }
     return values
   }
@@ -171,6 +190,13 @@ export default class Form {
     // Perform my local validation.
     this.validateFields(errorSet)
     this.validateForm(errorSet)
+
+    // Perform any multi-form validation.
+    for (const SubForm of this.multi || []) {
+      const sub = new SubForm(values)
+      sub.validate(force)
+      errorSet.errors = ErrorSet.merge(errorSet.errors, sub.state.errors)
+    }
 
     // If the form value is an array add up counts from the sub-
     // forms in the array. Otherwise check if any sub-form fields
@@ -225,22 +251,23 @@ export default class Form {
     let errors
     if (Array.isArray(values)) {
       // TODO: Manage touched when removing an array item.
-      if (name === null) {
-        values = [
-          ...values,
-          Form.normalize(value)
-        ]
+      let names
+      if (!Array.isArray(name)) {
+        names = [name]
       }
       else {
-        name = parseInt(name)
-        if (name >= 0 && name < values.length) {
-          if (value === null) {
-            values = [
-              ...values.slice(0, name),
-              ...values.slice(name + 1)
-            ]
-          }
-          else {
+        names = name
+      }
+      for (let name of names) {
+        if (name === null) {
+          values = [
+            ...values,
+            Form.normalize({values: value})
+          ]
+        }
+        else {
+          name = parseInt(name)
+          if (name >= 0 && name < values.length) {
             values = [
               ...values.slice(0, name),
               value,
@@ -249,6 +276,7 @@ export default class Form {
           }
         }
       }
+      values = values.filter(x => x !== null)
     }
     else {
       if (name === Form.MULTI) {
@@ -286,7 +314,7 @@ export default class Form {
     touched = this.getTouched(touched)
     return {
       ...touched,
-      [name]: !!((touched[name] || false) | (!!value || initial[name] != value))
+      [name]: !!((touched[name] || false) || (!!value || initial[name] != value))
     }
   }
 

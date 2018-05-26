@@ -2,7 +2,7 @@ import {expect} from 'code'
 
 import Form from '../src/Form'
 
-import {ArrayForm, ParentForm} from './forms'
+import {ArrayForm, ParentForm, RequiredFieldForm} from './forms'
 
 describe('Form', function() {
 
@@ -27,7 +27,7 @@ describe('Form', function() {
         'f1': 'v1'
       }
       let form = new Form()
-      let result = form.parse(values)
+      form.parse(values)
 
       it('sets values on form', function() {
         expect(form.state.values).to.equal(values)
@@ -52,7 +52,7 @@ describe('Form', function() {
         }
       }
       let form = new ParentForm()
-      let result = form.parse(values)
+      form.parse(values)
 
       it('sets first level values on form', function() {
         expect(form.state.values.f0).to.equal(values.f0)
@@ -91,7 +91,7 @@ describe('Form', function() {
         }
       ]
       let form = new ArrayForm()
-      let result = form.parse(values)
+      form.parse(values)
 
       it('sets array values on form', function() {
         expect(form.state.values[0].values).to.equal(values[0])
@@ -106,6 +106,26 @@ describe('Form', function() {
       it('does not set array touched', function() {
         expect(form.state.values[0].touched).to.equal({})
         expect(form.state.values[1].touched).to.equal({})
+      })
+
+    })
+
+  })
+
+  describe('updateValues', function() {
+
+    describe('initialised', function() {
+      let form = new RequiredFieldForm({
+        values: {
+          f0: 'v0'
+        }
+      })
+
+      it('fails validation when cleared', function() {
+        expect(form.state.values.f0).to.not.be.empty()
+        form.updateValue('f0', '')
+        expect(form.state.values.f0).to.be.empty()
+        expect(form.state.errors.fields.f0).to.not.be.undefined()
       })
 
     })

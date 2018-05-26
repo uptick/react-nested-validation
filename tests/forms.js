@@ -1,4 +1,5 @@
 import Form from '../src/Form'
+import {required} from '../src/validators'
 
 class SubForm extends Form {
 }
@@ -34,11 +35,20 @@ class MultiForm extends Form {
   ]
 }
 
+class RequiredFieldForm extends Form {
+  fieldValidators = {
+    f0: [
+      required()
+    ]
+  }
+}
+
 export {
   SubForm,
   ParentForm,
   ArrayForm,
   FormA,
   FormB,
-  MultiForm
+  MultiForm,
+  RequiredFieldForm
 }

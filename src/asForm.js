@@ -6,7 +6,7 @@ import {isNil} from './utils'
 /**
  * HOC to turn a React class into a form.
  */
-export default options => Inner =>
+export default (options = {}) => Inner =>
   class extends React.Component {
     static Form = options.form
 
@@ -20,8 +20,12 @@ export default options => Inner =>
       }
     }
 
+    getFormClass = () => {
+      return this.props.Form || options.form
+    }
+
     makeForm = forceValidation => {
-      let Form = options.form
+      let Form = this.getFormClass()
       let form = new Form(this.getFormState())
       if (forceValidation) {
         form.validate(true)
@@ -30,22 +34,26 @@ export default options => Inner =>
     }
 
     getFormState = () => {
-      const {form = {}} = this.props
+      let {form = {}} = this.props
+      if (!(form || {}).values) {
+        let Form = this.getFormClass()
+        form = new Form().parse(this.props.initial)
+      }
       return Form.normalize({
-        ...form,
-        values: this.getFormValues()
+        ...form
       })
     }
 
-    getFormValues = () => {
-      const {form} = this.props
-      let values = (form || {}).values
-      if (!values) {
-        let Form = options.form
-        values = new Form().parse(this.props.initial).values
-      }
-      return values
-    }
+    // TODO: Deprecate.
+    /* getFormValues = () => {
+     *   const {form} = this.props
+     *   let values = (form || {}).values
+     *   if (!values) {
+     *     let Form = options.form
+     *     values = new Form().parse(this.props.initial).values
+     *   }
+     *   return values
+     * } */
 
     handleChange = (name, value) => {
       const form = this.makeForm()
@@ -77,7 +85,7 @@ export default options => Inner =>
 
       // Need to be sure we have at least an object value
       // for form.
-      let {form, ...otherProps} = this.props
+      let {form, Form, ...otherProps} = this.props
       if (isNil(form)) {
         form = this.makeForm(this.props.forceValidation).state
       }
