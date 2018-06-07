@@ -5,14 +5,17 @@ import ErrorSet from './ErrorSet'
  *
  * TODO: This should live elsewhere.
  */
-function mergeValues(form, values) {
-  return {
-    ...form,
+function mergeValues(Form, state, values) {
+  state = {
+    ...state,
     values: {
-      ...(form.values || {}),
+      ...(state.values || {}),
       ...values
     }
   }
+  const form = new Form(state)
+  form.validate()
+  return form.state
 }
 
 /**
@@ -113,6 +116,13 @@ export default class Form {
         ...values
       }
     }
+
+    // Call for any overloaded parsing. This is useful for things like
+    // conversion to form select objects.
+    if (this.parseValues) {
+      values = this.parseValues(values)
+    }
+
     this.state = {
       ...this.state,
       values,
@@ -238,6 +248,8 @@ export default class Form {
       ...this.state,
       errors: errorSet.errors
     }
+
+    return this.state
   }
 
   validateFields(errors) {
@@ -291,7 +303,7 @@ export default class Form {
           if (name >= 0 && name < values.length) {
             values = [
               ...values.slice(0, name),
-              options.merge ? mergeValues(values[name], value) : value,
+              options.merge ? mergeValues(this.nested[0], values[name], value) : value,
               ...values.slice(name + 1)
             ]
           }
