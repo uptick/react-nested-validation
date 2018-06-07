@@ -55,9 +55,9 @@ export default (options = {}) => Inner =>
      *   return values
      * } */
 
-    handleChange = (name, value) => {
+    handleChange = (name, value, options) => {
       const form = this.makeForm()
-      form.updateValue(name, value)
+      form.updateValue(name, value, options)
       const {onChange, formPrefix} = this.props
       if (onChange) {
         if (formPrefix === Form.MULTI || !isNil(formPrefix)) {

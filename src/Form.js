@@ -1,6 +1,21 @@
 import ErrorSet from './ErrorSet'
 
 /**
+ * Merge an object of values into a form.
+ *
+ * TODO: This should live elsewhere.
+ */
+function mergeValues(form, values) {
+  return {
+    ...form,
+    values: {
+      ...(form.values || {}),
+      ...values
+    }
+  }
+}
+
+/**
  * Base class for creating new forms. A form is responsible for data
  * initialisation and validation. Forms may be used hierarchically, in both
  * objects and lists.
@@ -245,7 +260,7 @@ export default class Form {
     }
   }
 
-  updateValue(name, value) {
+  updateValue(name, value, options = {}) {
     let values = this.getValues()
     let touched = this.state.touched
     let errors
@@ -259,18 +274,24 @@ export default class Form {
         names = name
       }
       for (let name of names) {
+
+        // Null name indicates appending an entry to the array.
         if (name === null) {
           values = [
             ...values,
             Form.normalize({values: value})
           ]
         }
+
+        // A value for name indicates either deletion or bulk
+        // update. Deletion is carried out when value is null.
+        // Anything other than null is merged.
         else {
           name = parseInt(name)
           if (name >= 0 && name < values.length) {
             values = [
               ...values.slice(0, name),
-              value,
+              options.merge ? mergeValues(values[name], value) : value,
               ...values.slice(name + 1)
             ]
           }
