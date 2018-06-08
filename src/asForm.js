@@ -90,7 +90,7 @@ export default (options = {}) => Inner =>
       form.updateValue(name, value, options)
       const {onChange, formPrefix} = this.props
       if (onChange) {
-        if (formPrefix === Form.MULTI || !isNil(formPrefix)) {
+        if (!isNil(formPrefix)) {
           onChange(formPrefix, form.state)
         }
         else {

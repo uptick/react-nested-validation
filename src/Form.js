@@ -30,8 +30,6 @@ export default class Form {
 
   static WARNING = 'warning'
 
-  static MULTI = ''
-
   /**
    * Ensure an errors object has all standard fields.
    */
@@ -154,12 +152,6 @@ export default class Form {
       initial
     }
 
-    // Handle multi-forms. Apply each multi-form to the same state we've
-    // just calculated.
-    for (const MultiForm of (this.multi || [])) {
-      this.state = new MultiForm(this.state).parse(values, forceValidation)
-    }
-
     // Render my flat version of values. Do this after we've recursed
     // so as to have all my values already rendered.
     this.render()
@@ -211,43 +203,6 @@ export default class Form {
 
   renderValues(values) {
     return values
-    /* if (values === undefined) {
-     *   values = this.state.values
-     * }
-     * if (Array.isArray(this.nested)) {
-     *   const Sub = this.nested[0]
-     *   values = (values || []).map(x => new Sub(x).renderValues())
-     * }
-     * else {
-     *   values = values || {}
-     *   if (this.nested) {
-     *     let newValues = {
-     *       ...values
-     *     }
-     *     for (const [fldName, Sub] of Object.entries(this.nested)) {
-     *       const sub = new Sub(values[fldName])
-     *       newValues[fldName] = sub.renderValues()
-     *     }
-     *     values = newValues
-     *   }
-     *   if(this.multi) {
-     *     values = values || {}
-     *     let newValues = {
-     *       ...values
-     *     }
-     *     for (const Multi of this.multi) {
-     *       newValues = {
-     *         ...newValues,
-     *         ...new Multi().renderValues(newValues)
-     *       }
-     *     }
-     *     values = newValues
-     *   }
-     *   else {
-     *     values = values || {}
-     *   }
-     * }
-     * return values */
   }
 
   validate(force) {
@@ -285,13 +240,6 @@ export default class Form {
     // Perform my local validation.
     this.validateFields(errorSet)
     this.validateForm(errorSet)
-
-    // Perform any multi-form validation.
-    for (const SubForm of this.multi || []) {
-      const sub = new SubForm(values)
-      sub.validate(force)
-      errorSet.errors = ErrorSet.merge(errorSet.errors, sub.state.errors)
-    }
 
     // If the form value is an array add up counts from the sub-
     // forms in the array. Otherwise check if any sub-form fields
@@ -435,24 +383,11 @@ export default class Form {
       values = values.filter(x => x !== null)
     }
     else {
-      if (name === Form.MULTI) {
-        values = {
-          ...values,
-          ...value.values
-        }
-        touched = {
-          ...touched,
-          ...(value.touched || {})
-        }
-        errors = value.errors
+      values = {
+        ...values,
+        [name]: value
       }
-      else {
-        values = {
-          ...values,
-          [name]: value
-        }
-        touched = this.updateTouched(name, value, this.state.touched)
-      }
+      touched = this.updateTouched(name, value, this.state.touched)
     }
     this.state = {
       ...this.state,

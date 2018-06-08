@@ -46,13 +46,6 @@ class FormB extends Form {
 
 }
 
-class MultiForm extends Form {
-  multi = [
-    FormA,
-    FormB
-  ]
-}
-
 class RequiredFieldForm extends Form {
   fieldValidators = {
     f0: [
@@ -67,6 +60,5 @@ export {
   ArrayForm,
   FormA,
   FormB,
-  MultiForm,
   RequiredFieldForm
 }
