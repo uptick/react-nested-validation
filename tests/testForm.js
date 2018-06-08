@@ -2,7 +2,7 @@ import {expect} from 'code'
 
 import Form from '../src/Form'
 
-import {ArrayForm, ParentForm, RequiredFieldForm} from './forms'
+import {FormA, ArrayForm, ParentForm, RequiredFieldForm} from './forms'
 
 describe('Form', function() {
 
@@ -128,6 +128,68 @@ describe('Form', function() {
         expect(form.state.errors.fields.f0).to.not.be.undefined()
       })
 
+    })
+
+  })
+
+  describe('updateIn', function() {
+
+    it('works for basic updates', function() {
+      let form = new FormA()
+      form.parse({
+        f0: 'v0',
+        a: [{f1: 'v1'}]
+      })
+      form.updateIn({f0: 'v2'})
+      form.updateIn({f1: 'v3'}, 'a.0')
+      form.updateIn({f2: 'v4'}, 'a.0')
+      expect(form.state.flat).to.equal({
+        f0: 'v2',
+        a: [{f1: 'v3', f2: 'v4'}]
+      })
+    })
+
+    it('works for array insertion', function() {
+      let form = new FormA()
+      form.parse({
+        f0: 'v0',
+        a: [
+          {f1: 'v1'},
+          {f2: 'v2'}
+        ]
+      })
+      form.updateIn([{f3: 'v3'}, {f4: 'v4'}], 'a')
+      expect(form.state.flat).to.equal({
+        f0: 'v0',
+        a: [
+          {f1: 'v1'},
+          {f2: 'v2'},
+          {f3: 'v3'},
+          {f4: 'v4'}
+        ]
+      })
+    })
+
+    it('works for array spread', function() {
+      let form = new FormA()
+      form.parse({
+        f0: 'v0',
+        a: [
+          {f1: 'v1'},
+          {f2: 'v2'}
+        ]
+      })
+      form.updateIn({
+        '0.f1': 'v3',
+        '1.f3': 'v4'
+      }, 'a')
+      expect(form.state.flat).to.equal({
+        f0: 'v0',
+        a: [
+          {f1: 'v3'},
+          {f2: 'v2', f3: 'v4'}
+        ]
+      })
     })
 
   })

@@ -15,7 +15,7 @@ export default (options = {}) => Inner =>
       if (!props.form) {
         const form = this.makeForm()
         if (props.onChange) {
-          props.onChange(form.state)
+          props.onChange({state: form.state})
         }
       }
     }
@@ -54,6 +54,36 @@ export default (options = {}) => Inner =>
      *   }
      *   return values
      * } */
+
+    handleChange2 = (payload, path) => {
+      const {onChange, formPrefix} = this.props
+      if (!isNil(formPrefix)) {
+        console.debug('Deferring form update with prefix and path: ', formPrefix, path)
+        if (!isNil(path)) {
+          path = `${formPrefix}.${path}`
+        }
+        else {
+          path = formPrefix
+        }
+        if (onChange) {
+          onChange(payload, path)
+        }
+      }
+      else {
+        console.debug('Form changed with path and payload: ', path, payload)
+        const form = this.makeForm()
+        form.updateIn(payload, path)
+        console.debug(' New state: ', form.state)
+        if (onChange) {
+          onChange({
+            state: form.state,
+            values: form.flat,
+            payload,
+            path
+          })
+        }
+      }
+    }
 
     handleChange = (name, value, options) => {
       const form = this.makeForm()
@@ -94,7 +124,7 @@ export default (options = {}) => Inner =>
         <Inner
           {...otherProps}
           form={form}
-          onChange={this.handleChange}
+          onChange={this.handleChange2}
         />
       )
     }

@@ -1,4 +1,5 @@
 import ErrorSet from './ErrorSet'
+import {capitalize} from './utils'
 
 /**
  * Merge an object of values into a form.
@@ -97,28 +98,51 @@ export default class Form {
       ]
     }
     else {
-      if (this.nested) {
-        values = values || {}
-        let newValues = {
-          ...values
+      values = values || {}
+      let newValues
+
+      // If we've been given a set of fields to copy, use them.
+      // Otherwise use all available fields.
+      if (this.fields) {
+        newValues = {}
+        for (const fldName of this.fields) {
+          newValues[fldName] = values[fldName]
         }
-        for (const [fldName, Sub] of Object.entries(this.nested)) {
-          const sub = new Sub()
-          newValues[fldName] = sub.parse(values[fldName], forceValidation)
-        }
-        values = newValues
       }
       else {
-        values = values || {}
+        newValues = {
+          ...values
+        }
+      }
+
+      if (this.nested) {
+        for (const [fldName, Sub] of Object.entries(this.nested)) {
+
+          // Check for a nested parser and use that if it exists. If
+          // not, use the same flat values.
+          let subValues
+          const func = this[`initial${capitalize(fldName)}`]
+          if (func) {
+            subValues = func(values, fldName)
+          }
+          else {
+            subValues = values
+          }
+
+          const sub = new Sub()
+          newValues[fldName] = sub.parse(subValues, forceValidation)
+        }
       }
       values = {
         ...(this.state.values || {}),
-        ...values
+        ...newValues
       }
     }
 
     // Call for any overloaded parsing. This is useful for things like
-    // conversion to form select objects.
+    // conversion to form select objects. This is preferable to
+    // overlading `parse` as we want to do a single validation at the
+    // end of value parsing.
     if (this.parseValues) {
       values = this.parseValues(values)
     }
@@ -136,48 +160,94 @@ export default class Form {
       this.state = new MultiForm(this.state).parse(values, forceValidation)
     }
 
+    // Render my flat version of values. Do this after we've recursed
+    // so as to have all my values already rendered.
+    this.render()
+
     this.validate(forceValidation)
     return this.state
   }
 
-  renderValues(values) {
-    if (values === undefined) {
-      values = this.state.values
-    }
+  render() {
+    const {values} = this.state
+    let flat
     if (Array.isArray(this.nested)) {
-      const Sub = this.nested[0]
-      values = (values || []).map(x => new Sub(x).renderValues())
+      flat = values.map(sub => sub.flat)
     }
     else {
-      values = values || {}
-      if (this.nested) {
-        let newValues = {
-          ...values
+      if (this.fields) {
+        flat = {}
+        for (const fldName of this.fields) {
+          flat[fldName] = values[fldName]
         }
-        for (const [fldName, Sub] of Object.entries(this.nested)) {
-          const sub = new Sub(values[fldName])
-          newValues[fldName] = sub.renderValues()
-        }
-        values = newValues
-      }
-      if(this.multi) {
-        values = values || {}
-        let newValues = {
-          ...values
-        }
-        for (const Multi of this.multi) {
-          newValues = {
-            ...newValues,
-            ...new Multi().renderValues(newValues)
-          }
-        }
-        values = newValues
       }
       else {
-        values = values || {}
+        flat = {
+          ...values
+        }
+      }
+      for (const fldName of Object.keys(this.nested)) {
+        const func = this[`render${capitalize(fldName)}`]
+        const subFlat = this.state.values[fldName].flat
+        if (func) {
+          flat = func(flat, subFlat)
+        }
+        else {
+          if (Array.isArray(subFlat)) {
+            flat[fldName] = subFlat
+          }
+          else {
+            flat = {
+              ...flat,
+              ...subFlat
+            }
+          }
+        }
       }
     }
+    this.state.flat = this.renderValues(flat)
+    return flat
+  }
+
+  renderValues(values) {
     return values
+    /* if (values === undefined) {
+     *   values = this.state.values
+     * }
+     * if (Array.isArray(this.nested)) {
+     *   const Sub = this.nested[0]
+     *   values = (values || []).map(x => new Sub(x).renderValues())
+     * }
+     * else {
+     *   values = values || {}
+     *   if (this.nested) {
+     *     let newValues = {
+     *       ...values
+     *     }
+     *     for (const [fldName, Sub] of Object.entries(this.nested)) {
+     *       const sub = new Sub(values[fldName])
+     *       newValues[fldName] = sub.renderValues()
+     *     }
+     *     values = newValues
+     *   }
+     *   if(this.multi) {
+     *     values = values || {}
+     *     let newValues = {
+     *       ...values
+     *     }
+     *     for (const Multi of this.multi) {
+     *       newValues = {
+     *         ...newValues,
+     *         ...new Multi().renderValues(newValues)
+     *       }
+     *     }
+     *     values = newValues
+     *   }
+     *   else {
+     *     values = values || {}
+     *   }
+     * }
+     * return values */
   }
 
   validate(force) {
@@ -272,11 +342,62 @@ export default class Form {
     }
   }
 
+  /**
+   * TODO: This method has gotten a little crazy.
+   */
+  updateIn(payload, path) {
+    if (path === undefined) {
+      path = []
+    } else if (!Array.isArray(path)) {
+      path = path.split('.')
+    }
+    if (path.length > 0) {
+      let subKey
+      let subForm
+      if (Array.isArray(this.nested)) {
+        subKey = parseInt(path[0])
+        const SubForm = this.nested[0]
+        subForm = new SubForm(this.state.values[subKey])
+      }
+      else {
+        subKey = path[0]
+        const SubForm = this.nested[subKey]
+        subForm = new SubForm(this.state.values[subKey])
+      }
+      subForm.updateIn(payload, path.slice(1))
+      this.updateValue(subKey, subForm.state)
+    }
+    else {
+      if (Array.isArray(this.nested) && Array.isArray(payload)) {
+        for (const item of payload) {
+          this.updateValue(null, item)
+        }
+      }
+      else {
+        for (const [key, value] of Object.entries(payload)) {
+          if (key.includes('.')) {
+            const splitKey = key.split('.')
+            this.updateIn(
+              {[splitKey[splitKey.length - 1]]: value},
+              splitKey.slice(0, splitKey.length - 1)
+            )
+          }
+          else {
+            this.updateValue(key, value)
+          }
+        }
+      }
+    }
+    this.render()
+  }
+
   updateValue(name, value, options = {}) {
     let values = this.getValues()
     let touched = this.state.touched
     let errors
     if (Array.isArray(values)) {
+      const SubForm = this.nested[0]
+
       // TODO: Manage touched when removing an array item.
       let names
       if (!Array.isArray(name)) {
@@ -289,9 +410,11 @@ export default class Form {
 
         // Null name indicates appending an entry to the array.
         if (name === null) {
+          const subForm = new SubForm()
+          subForm.parse(value)
           values = [
             ...values,
-            Form.normalize({values: value})
+            subForm.state
           ]
         }
 

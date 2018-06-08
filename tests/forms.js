@@ -5,9 +5,15 @@ class SubForm extends Form {
 }
 
 class ParentForm extends Form {
+
   nested = {
     sub: SubForm
   }
+
+  initialSub(values) {
+    return values.sub
+  }
+
 }
 
 class ArrayForm extends Form {
@@ -17,15 +23,27 @@ class ArrayForm extends Form {
 }
 
 class FormA extends Form {
+
   nested = {
     a: ArrayForm
   }
+
+  initialA(values) {
+    return values.a
+  }
+
 }
 
 class FormB extends Form {
+
   nested = {
     b: ArrayForm
   }
+
+  initialA(values) {
+    return values.b
+  }
+
 }
 
 class MultiForm extends Form {

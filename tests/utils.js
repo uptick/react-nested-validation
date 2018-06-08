@@ -31,8 +31,8 @@ const wrapper = Inner =>
       form: null
     }
 
-    handleChange = form => {
-      this.setState({form})
+    handleChange = ({state}) => {
+      this.setState({form: state})
     }
 
     render() {
