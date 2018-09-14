@@ -107,7 +107,9 @@ export default (options = {}) => Inner =>
     shouldComponentUpdate(nextProps) {
       return (
         (nextProps.form || {}).values != (this.props.form || {}).values ||
-        (nextProps.form || {}).errors != (this.props.form || {}).errors
+        (nextProps.form || {}).errors != (this.props.form || {}).errors || (
+          this.props.shouldUpdate && this.props.shouldUpdate(nextProps, this.props)
+        )
       )
     }
 
