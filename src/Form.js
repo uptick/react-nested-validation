@@ -90,8 +90,9 @@ export default class Form {
         const sub = new this.nested[0]()
         return sub.parse(x, forceValidation)
       })
+      const stateValues = Array.isArray(this.state.values) ? this.state.values : []
       values = [
-        ...(this.state.values || []),
+        ...(stateValues || []),
         ...values
       ]
     }
