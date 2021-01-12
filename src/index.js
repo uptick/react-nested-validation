@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-export asForm from './asForm'
-export asFormWizard from './asFormWizard'
-export Form from './Form'
+export { default as asForm } from './asForm'
+export { default as asFormWizard } from './asFormWizard'
+export { default as Form }from './Form'
 export * from './validators'
