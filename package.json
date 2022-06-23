@@ -57,7 +57,7 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-react": "^7.4.0",
     "eslint-plugin-standard": "^3.0.1",
-    "jsdom": "^11.10.0",
+    "jsdom": "^16.5.0",
     "mocha": "^5.1.1",
     "peer-deps-externals-webpack-plugin": "^1.0.2",
     "react": "^16.3.1",
